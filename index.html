@@ -31,6 +31,7 @@
             min-width:400px;
             height:100%;
             width:100%;
+            opacity: 0.5;
         }
         .content {
             padding-left:80px;
@@ -157,7 +158,7 @@
 
     <script>
 
-        var contractAddress = "n1kxuvjjYmPjz87zfyk4dehqfpBguuTq23C"
+        var contractAddress = "n1jEBU3Gr9BCigLk8yavBSjQWHyskPfN6Xu"
 
 
         function getWords() {
@@ -236,13 +237,15 @@
                 var normalizedData = normalize(JSON.parse(e.data.data['neb_call'].result));
                 $('#wordcloud').html("").jQCloud(normalizedData,{
                     autoResize: true,
-                    classPattern: null,
-                    colors: ["#111", "#222", "#333", "#444", "#555", "#666", "#777", "#888", "#999"],
                     fontSize: {
                         from: 0.1,
                         to: 0.02
                     }
-                });
+                }).animate($( "#wordcloud" ).animate({
+                    opacity: 1,
+                }, 1000, function() {
+                    // Animation complete.
+                }));
 
             } catch (e) {
                     console.log(e);
