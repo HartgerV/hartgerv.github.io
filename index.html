@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>Nebulas word cloud</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            color: #555;
+        }
+
+        body, #wordcloud {
+            background: #ffffff; /* Old browsers */
+            background: -moz-linear-gradient(top, #ffffff 0%, #f6f6f6 47%, #ededed 100%); /* FF3.6-15 */
+            background: -webkit-linear-gradient(top, #ffffff 0%,#f6f6f6 47%,#ededed 100%); /* Chrome10-25,Safari5.1-6 */
+            background: linear-gradient(to bottom, #ffffff 0%,#f6f6f6 47%,#ededed 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+            filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
+        }
+
+        #leaderInfo {
+            padding-left: 90px;
+            padding-top: 10px;
+            font-family: "Courier New", Courier, monospace;
+        }
+        #wordcloud {
+            min-height:400px;
+            min-width:400px;
+            height:100%;
+            width:100%;
+        }
+        .content {
+            padding-left:80px;
+            padding-right:80px;
+            padding-top:80px;
+            font-family: "Courier New", Courier, monospace;
+        }
+        .spinner {
+            margin: 100px auto;
+            width: 40px;
+            height: 40px;
+            position: relative;
+        }
+
+        .cube1, .cube2 {
+            background-color: #333;
+            width: 15px;
+            height: 15px;
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            -webkit-animation: sk-cubemove 1.8s infinite ease-in-out;
+            animation: sk-cubemove 1.8s infinite ease-in-out;
+        }
+
+        .cube2 {
+            -webkit-animation-delay: -0.9s;
+            animation-delay: -0.9s;
+        }
+
+        @-webkit-keyframes sk-cubemove {
+            25% { -webkit-transform: translateX(42px) rotate(-90deg) scale(0.5) }
+            50% { -webkit-transform: translateX(42px) translateY(42px) rotate(-180deg) }
+            75% { -webkit-transform: translateX(0px) translateY(42px) rotate(-270deg) scale(0.5) }
+            100% { -webkit-transform: rotate(-360deg) }
+        }
+
+        @keyframes sk-cubemove {
+            25% {
+                transform: translateX(42px) rotate(-90deg) scale(0.5);
+                -webkit-transform: translateX(42px) rotate(-90deg) scale(0.5);
+            } 50% {
+                  transform: translateX(42px) translateY(42px) rotate(-179deg);
+                  -webkit-transform: translateX(42px) translateY(42px) rotate(-179deg);
+              } 50.1% {
+                    transform: translateX(42px) translateY(42px) rotate(-180deg);
+                    -webkit-transform: translateX(42px) translateY(42px) rotate(-180deg);
+                } 75% {
+                      transform: translateX(0px) translateY(42px) rotate(-270deg) scale(0.5);
+                      -webkit-transform: translateX(0px) translateY(42px) rotate(-270deg) scale(0.5);
+                  } 100% {
+                        transform: rotate(-360deg);
+                        -webkit-transform: rotate(-360deg);
+                    }
+        }
+        .w10 {
+            color: #111 !important;
+        }
+        .w9 {
+            color: #111 !important;
+        }
+        .w8 {
+            color: #222 !important;
+        }
+        .w7 {
+            color: #333 !important;
+        }
+        .w6 {
+            color: #444 !important;
+        }
+        .w5 {
+            color: #555 !important;
+        }
+        .w4 {
+            color: #666 !important;
+        }
+        .w3 {
+            color: #777 !important;
+        }
+        .w2 {
+            color: #888 !important;
+        }
+        .w1 {
+            color: #999 !important;
+        }
+    </style>
+</head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jqcloud/1.0.4/jqcloud.css" rel="stylesheet">
+
+<body>
+<header>
+</header>
+<section id="input">
+    <div class=" content">
+        <h1>Nebulas word cloud</h1>
+        <h3 class="title"></h3>
+        Hey! Want to get the word out, support your local team or perhaps just eternalize yourself on the blockchain? The nebulas word cloud got you covered. Simply
+        input a word and your desired NAS amount! The words are sized by their relative value (amount of nas invested in it) compared to the rest. You can always
+        add additional weight to existing words, so make sure to stay on top!
+        <div id="inputfields">
+            <input id="word" maxlength="35" placeholder="insert your word">
+            <input id="value" placeholder="nas value">
+        </div>
+
+        <button onclick="addValueToWord()" class="button">Add to the cloud!</button>
+        </li>
+    </div>
+    <span id="leaderInfo"></span>
+
+
+</section>
+<div id="wordcloud" >
+    <div class="spinner">
+        <div class="cube1"></div>
+        <div class="cube2"></div>
+    </div>
+    <div style="text-align: center;
+        font-family: 'Courier New', Courier, monospace;
+        color: #888888;
+        font-size: 10px">The cloud is currently loading, if nothing appears please make sure your web wallet extensions is available.</div>
+</div>
+
+    <script>
+
+        var contractAddress = "n1kxuvjjYmPjz87zfyk4dehqfpBguuTq23C"
+
+
+        function getWords() {
+            var func = "getWords";
+            window.postMessage({
+                "target": "contentscript",
+                "data": {
+                    "to": contractAddress,
+                    "value": "0",
+                    "contract": {
+                        "function": func,
+                        "args": ""
+                    }
+                },
+                "method": "neb_call"
+            }, "*");
+        }
+
+
+        function addValueToWord() {
+
+            word = document.getElementById("word").value
+            value = document.getElementById("value").value
+
+            console.log("-------Add to the Smart Contract------");
+            var func = "addValueToWord";
+            var args = "[\"" + word + "\"]";
+
+            window.postMessage({
+                "target": "contentscript",
+                "data": {
+                    "to": contractAddress,
+                    "value": value,
+                    "contract": {
+                        "function": func,
+                        "args": args
+                    }
+                },
+                "method": "neb_sendTransaction"
+            }, "*");
+        }
+
+        function normalize(data) {
+            var max = null;
+            var min = null;
+            var weights = [];
+            var words = [];
+            for(var i = 0; i < data.length; i++) {
+                weights.push(data[i].weight);
+                words.push(data[i].text)
+            }
+            console.log(weights);
+            console.log(words);
+            min = Math.min.apply(null, weights);
+            max = Math.max.apply(null, weights);
+            $("#leaderInfo").html("Currently the biggest word is " + words[weights.indexOf(max.toString())] + " with a value of "+ (max/1000000000000000000) + " NAS");
+            console.log("min: "+min+" max: "+max );
+            for(var j = 0; j < data.length; j++) {
+                if(max - min === 0) {
+                    data[j].weight = data[j].weight - min;
+                }
+                else{
+                    data[j].weight = (data[j].weight - min)/(max - min);
+                }
+                console.log(data[j]);
+                data[j].weight = Math.log(20*(data[j].weight+0.05))+1;
+            }
+            console.log(data);
+            return data;
+        }
+
+        window.addEventListener('message', function (e) {
+            console.log(e);
+            try {
+                var getResults = JSON.parse(e.data.data['neb_call'].result);
+                var normalizedData = normalize(JSON.parse(e.data.data['neb_call'].result));
+                $('#wordcloud').html("").jQCloud(normalizedData,{
+                    autoResize: true,
+                    classPattern: null,
+                    colors: ["#111", "#222", "#333", "#444", "#555", "#666", "#777", "#888", "#999"],
+                    fontSize: {
+                        from: 0.1,
+                        to: 0.02
+                    }
+                });
+
+            } catch (e) {
+                    console.log(e);
+            }
+        })
+        getWords();
+    </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqcloud/1.0.4/jqcloud-1.0.4.js"></script>
+</body>
+</html>
